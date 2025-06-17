@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listagem de Usuários - Sistema de Alertas Bancários</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #1a1a1a;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .menu {
+      background: rgba(26, 26, 26, 0.95);
+      backdrop-filter: blur(10px);
+      color: #f2f2f2;
+      padding: 1.5rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .menu-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .menu h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .menu nav {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .menu a {
+      color: #f2f2f2;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .menu a.active {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+    }
+
+    .menu a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      transition: left 0.3s ease;
+      z-index: -1;
+    }
+
+    .menu a:hover::before {
+      left: 0;
+    }
+
+    .menu a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .controls-section {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .search-container {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #667eea;
+      font-size: 1.1rem;
+    }
+
+    .refresh-btn {
+      padding: 1rem 1.5rem;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      border: 2px solid rgba(102, 126, 234, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: inherit;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(102, 126, 234, 0.15);
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    .add-user-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: inherit;
+      text-decoration: none;
+    }
+
+    .add-user-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .users-section {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .loading-spinner.show {
+      display: block;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+
+    .users-table th,
+    .users-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .users-table th {
+      background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      font-weight: 600;
+      color: #333;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .users-table tr {
+      transition: all 0.3s ease;
+    }
+
+    .users-table tbody tr:hover {
+      background: rgba(102, 126, 234, 0.05);
+      transform: scale(1.01);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-details h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .user-details p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-active {
+      background: rgba(16, 185, 129, 0.1);
+      color: #065f46;
+    }
+
+    .status-inactive {
+      background: rgba(156, 163, 175, 0.1);
+      color: #374151;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+    }
+
+    .btn-view {
+      background: rgba(59, 130, 246, 0.1);
+      color: #1d4ed8;
+    }
+
+    .btn-edit {
+      background: rgba(16, 185, 129, 0.1);
+      color: #047857;
+    }
+
+    .btn-delete {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .no-users {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+
+    .no-users-icon {
+      font-size: 4rem;
+      color: #ddd;
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 2rem;
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 12px;
+      margin: 1rem 0;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+
+    .pagination button {
+      padding: 0.75rem 1rem;
+      border: 2px solid #e1e5e9;
+      background: white;
+      color: #666;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .pagination button.active {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border-color: transparent;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 12px;
+      display: none;
+      font-weight: 500;
+      position: relative;
+      animation: slideInDown 0.5s ease-out;
+    }
+
+    .message.show {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .success {
+      background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+      color: #065f46;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .menu-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .menu nav {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .container {
+        padding: 0 1rem;
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .users-table {
+        font-size: 0.9rem;
+      }
+
+      .users-table th,
+      .users-table td {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .stats-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .users-table {
+        font-size: 0.8rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="menu">
+    <div class="menu-content">
+      <h1>Sistema de Alertas Bancários</h1>
+      <nav>
+        <a href="index.html"><i class="fas fa-home"></i> Início</a>
+        <a href="listagem_usuarios.html" class="active"><i class="fas fa-users"></i> Usuários</a>
+        <a href="mensagens.html"><i class="fas fa-envelope"></i> Mensagens</a>
+        <a href="index.html"><i class="fas fa-sign-out-alt"></i> Sair</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Gerenciar Usuários</h1>
+      <p class="page-subtitle">Visualize e gerencie todos os usuários cadastrados no sistema</p>
+    </div>
+
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-number" id="totalUsers">0</div>
+        <div class="stat-label">Total de Usuários</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="activeUsers">0</div>
+        <div class="stat-label">Ativos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="newUsers">0</div>
+        <div class="stat-label">Novos (30 dias)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="inactiveUsers">0</div>
+        <div class="stat-label">Inativos</div>
+      </div>
+    </div>
+
+    <div id="successMessage" class="message success">
+      <i class="fas fa-check-circle"></i>
+      <span>Operação realizada com sucesso!</span>
+    </div>
+
+    <div class="controls-section">
+      <div class="controls-grid">
+        <div class="search-container">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search-input" id="searchInput" placeholder="Buscar usuários por nome ou telefone..." onkeyup="buscarUsuarios()">
+        </div>
+        <button class="refresh-btn" onclick="carregarUsuariosDaAPI()">
+          <i class="fas fa-sync-alt"></i>
+          Atualizar
+        </button>
+        <a href="cadastro.html" class="add-user-btn">
+          <i class="fas fa-plus"></i>
+          Novo Usuário
+        </a>
+      </div>
+    </div>
+
+    <div class="users-section">
+      <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Carregando usuários...</p>
+      </div>
+
+      <div class="error-message" id="errorMessage">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <h3>Erro ao carregar usuários</h3>
+          <p>Não foi possível conectar com o servidor. Verifique se o backend está rodando em http://localhost:8080</p>
+        </div>
+      </div>
+
+      <table class="users-table" id="usersTable" style="display: none;">
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>Telefone</th>
+            <th>Data de Cadastro</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+          <!-- Usuários serão carregados aqui -->
+        </tbody>
+      </table>
+
+      <div class="no-users" id="noDataMessage" style="display: none;">
+        <div class="no-users-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <h3>Nenhum usuário encontrado</h3>
+        <p>Não há usuários cadastrados no sistema ou que correspondam aos critérios de busca.</p>
+      </div>
+
+      <div class="pagination" id="pagination" style="display: none;">
+        <button onclick="mudarPagina(paginaAtual - 1)" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+        <span id="pageNumbers"></span>
+        <button onclick="mudarPagina(paginaAtual + 1)" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let todosUsuarios = [];
+    let usuariosFiltrados = [];
+    let paginaAtual = 1;
+    const itensPorPagina = 10;
+
+    // Carregar usuários da API ao inicializar a página
+    document.addEventListener('DOMContentLoaded', function() {
+      carregarUsuariosDaAPI();
+    });
+
+    async function carregarUsuariosDaAPI() {
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const errorMessage = document.getElementById('errorMessage');
+      const usersTable = document.getElementById('usersTable');
+      const noDataMessage = document.getElementById('noDataMessage');
+      
+      // Mostrar loading
+      loadingSpinner.classList.add('show');
+      errorMessage.classList.remove('show');
+      usersTable.style.display = 'none';
+      noDataMessage.style.display = 'none';
+
+      try {
+        const response = await fetch('http://localhost:8080/users', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const usuarios = await response.json();
+        
+        // Processar dados dos usuários
+        todosUsuarios = usuarios.map(usuario => ({
+          id: usuario.id,
+          nome: usuario.nome,
+          telefone: formatarTelefone(usuario.telefone),
+          email: usuario.email || `${usuario.nome.toLowerCase().replace(/\s+/g, '.')}@email.com`,
+          dataCadastro: usuario.dataCadastro || new Date().toISOString().split('T')[0],
+          status: 'active' // Assumindo que usuários cadastrados estão ativos
+        }));
+
+        usuariosFiltrados = [...todosUsuarios];
+        
+        // Atualizar estatísticas
+        atualizarEstatisticas();
+        
+        // Carregar usuários na tabela
+        carregarUsuarios();
+        
+        // Esconder loading
+        loadingSpinner.classList.remove('show');
+
+      } catch (error) {
+        console.error('Erro ao carregar usuários:', error);
+        
+        // Esconder loading e mostrar erro
+        loadingSpinner.classList.remove('show');
+        errorMessage.classList.add('show');
+        
+        // Limpar estatísticas
+        document.getElementById('totalUsers').textContent = '0';
+        document.getElementById('activeUsers').textContent = '0';
+        document.getElementById('newUsers').textContent = '0';
+        document.getElementById('inactiveUsers').textContent = '0';
+      }
+    }
+
+    function formatarTelefone(telefone) {
+      // Remove tudo que não for dígito
+      const cleaned = telefone.replace(/\D/g, '');
+      
+      // Formatar como (XX) XXXXX-XXXX
+      if (cleaned.length === 11) {
+        return `(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 7)}-${cleaned.substring(7)}`;
+      } else if (cleaned.length === 10) {
+        return `(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 6)}-${cleaned.substring(6)}`;
+      }
+      
+      return telefone; // Retorna original se não conseguir formatar
+    }
+
+    function atualizarEstatisticas() {
+      const total = todosUsuarios.length;
+      const ativos = todosUsuarios.filter(u => u.status === 'active').length;
+      const inativos = total - ativos;
+      
+      // Calcular novos usuários (últimos 30 dias)
+      const trintaDiasAtras = new Date();
+      trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+      
+      const novos = todosUsuarios.filter(u => {
+        const dataCadastro = new Date(u.dataCadastro);
+        return dataCadastro >= trintaDiasAtras;
+      }).length;
+
+      // Animar contadores
+      animarContador('totalUsers', total);
+      animarContador('activeUsers', ativos);
+      animarContador('newUsers', novos);
+      animarContador('inactiveUsers', inativos);
+    }
+
+    function animarContador(elementId, valorFinal) {
+      const elemento = document.getElementById(elementId);
+      let valorAtual = 0;
+      const incremento = Math.ceil(valorFinal / 30);
+      
+      const timer = setInterval(() => {
+        valorAtual += incremento;
+        if (valorAtual >= valorFinal) {
+          valorAtual = valorFinal;
+          clearInterval(timer);
+        }
+        elemento.textContent = valorAtual.toLocaleString();
+      }, 50);
+    }
+
+    function carregarUsuarios() {
+      const tbody = document.getElementById('usersTableBody');
+      const noData = document.getElementById('noDataMessage');
+      const table = document.getElementById('usersTable');
+      const pagination = document.getElementById('pagination');
+      
+      if (usuariosFiltrados.length === 0) {
+        table.style.display = 'none';
+        pagination.style.display = 'none';
+        noData.style.display = 'block';
+        return;
+      }
+      
+      table.style.display = 'table';
+      noData.style.display = 'none';
+      
+      const inicio = (paginaAtual - 1) * itensPorPagina;
+      const fim = inicio + itensPorPagina;
+      const usuariosPagina = usuariosFiltrados.slice(inicio, fim);
+      
+      tbody.innerHTML = usuariosPagina.map(usuario => `
+        <tr>
+          <td>
+            <div class="user-info">
+              <div class="user-avatar">
+                ${usuario.nome.charAt(0).toUpperCase()}
+              </div>
+              <div class="user-details">
+                <h4>${usuario.nome}</h4>
+                <p>${usuario.email}</p>
+              </div>
+            </div>
+          </td>
+          <td>${usuario.telefone}</td>
+          <td>${formatarData(usuario.dataCadastro)}</td>
+          <td>
+            <span class="status-badge status-${usuario.status}">
+              ${usuario.status === 'active' ? 'Ativo' : 'Inativo'}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="action-btn btn-view" onclick="verDetalhes(${usuario.id})" title="Ver detalhes">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn btn-edit" onclick="editarUsuario(${usuario.id})" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn btn-delete" onclick="confirmarExclusao(${usuario.id})" title="Excluir">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      // Atualizar paginação
+      atualizarPaginacao();
+      
+      // Animação de entrada para as linhas
+      setTimeout(() => {
+        const rows = document.querySelectorAll('#usersTableBody tr');
+        rows.forEach((row, index) => {
+          row.style.opacity = '0';
+          row.style.transform = 'translateX(-20px)';
+          setTimeout(() => {
+            row.style.transition = 'all 0.5s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateX(0)';
+          }, index * 100);
+        });
+      }, 100);
+    }
+
+    function atualizarPaginacao() {
+      const pagination = document.getElementById('pagination');
+      const totalPaginas = Math.ceil(usuariosFiltrados.length / itensPorPagina);
+      
+      if (totalPaginas <= 1) {
+        pagination.style.display = 'none';
+        return;
+      }
+      
+      pagination.style.display = 'flex';
+      
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const pageNumbers = document.getElementById('pageNumbers');
+      
+      prevBtn.disabled = paginaAtual === 1;
+      nextBtn.disabled = paginaAtual === totalPaginas;
+      
+      // Gerar números das páginas
+      let paginasHTML = '';
+      for (let i = 1; i <= totalPaginas; i++) {
+        if (i === paginaAtual) {
+          paginasHTML += `<button class="active">${i}</button>`;
+        } else {
+          paginasHTML += `<button onclick="mudarPagina(${i})">${i}</button>`;
+        }
+      }
+      pageNumbers.innerHTML = paginasHTML;
+    }
+
+    function formatarData(data) {
+      const date = new Date(data);
+      return date.toLocaleDateString('pt-BR');
+    }
+
+    function buscarUsuarios() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      
+      usuariosFiltrados = todosUsuarios.filter(usuario => {
+        return usuario.nome.toLowerCase().includes(searchTerm) ||
+               usuario.telefone.includes(searchTerm) ||
+               usuario.email.toLowerCase().includes(searchTerm);
+      });
+      
+      paginaAtual = 1;
+      carregarUsuarios();
+    }
+
+    function mudarPagina(novaPagina) {
+      const totalPaginas = Math.ceil(usuariosFiltrados.length / itensPorPagina);
+      
+      if (novaPagina >= 1 && novaPagina <= totalPaginas) {
+        paginaAtual = novaPagina;
+        carregarUsuarios();
+      }
+    }
+
+    function verDetalhes(id) {
+      const usuario = todosUsuarios.find(u => u.id === id);
+      if (usuario) {
+        alert(`Detalhes do usuário:\n\nNome: ${usuario.nome}\nTelefone: ${usuario.telefone}\nEmail: ${usuario.email}\nData de Cadastro: ${formatarData(usuario.dataCadastro)}\nStatus: ${usuario.status === 'active' ? 'Ativo' : 'Inativo'}`);
+      }
+    }
+
+    function editarUsuario(id) {
+      alert(`Funcionalidade de edição será implementada para o usuário ID: ${id}`);
+    }
+
+    async function confirmarExclusao(id) {
+      if (confirm('Tem certeza que deseja excluir este usuário?')) {
+        try {
+          const response = await fetch(`http://localhost:8080/users/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+
+          if (response.ok) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.querySelector('span').textContent = `Usuário excluído com sucesso!`;
+            successMessage.classList.add('show');
+            
+            // Recarregar lista de usuários
+            carregarUsuariosDaAPI();
+            
+            setTimeout(() => {
+              successMessage.classList.remove('show');
+            }, 3000);
+          } else {
+            throw new Error('Erro ao excluir usuário');
+          }
+        } catch (error) {
+          console.error('Erro ao excluir usuário:', error);
+          alert('Erro ao excluir usuário. Tente novamente.');
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+
