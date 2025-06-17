@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listagem de Usuários - Sistema de Alertas Bancários</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      color: #1a1a1a;
+    }
+    .menu {
+      background-color: #1a1a1a;
+      color: #f2f2f2;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    .menu h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+    .menu nav {
+      margin-top: 1.5rem;
+    }
+    .menu a {
+      color: #f2f2f2;
+      margin: 0 15px;
+      text-decoration: none;
+      font-size: 1.1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+    .menu a:hover {
+      background-color: #333333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 0.5rem;
+    }
+    .search-container {
+      display: flex;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+    .search-container input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .search-container button {
+      padding: 10px 20px;
+      background-color: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .search-container button:hover {
+      background-color: #333333;
+    }
+    .add-button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .add-button:hover {
+      background-color: #333333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+    .action-buttons button {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .view-btn {
+      background-color: #e3f2fd;
+      color: #0d47a1;
+    }
+    .edit-btn {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    .delete-btn {
+      background-color: #ffebee;
+      color: #c62828;
+    }
+    .view-btn:hover {
+      background-color: #bbdefb;
+    }
+    .edit-btn:hover {
+      background-color: #c8e6c9;
+    }
+    .delete-btn:hover {
+      background-color: #ffcdd2;
+    }
+    .message {
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      display: none;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .no-data {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+        margin: 1rem;
+      }
+      .menu a {
+        display: inline-block;
+        margin: 5px;
+      }
+      .search-container {
+        flex-direction: column;
+      }
+      .action-buttons {
+        flex-direction: column;
+      }
+      th, td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="menu">
+    <h1>Sistema de Alertas Bancários</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="listagem_usuarios.html">Usuários</a>
+      <a href="mensagens.html">Mensagens</a>
+      <a href="index.html">Sair</a>
+    </nav>
+  </header>
+
+  <div class="container">
+
+  </div>
+
+  <script>
+    function buscarUsuarios() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const tableRows = document.querySelectorAll('#usersTable tbody tr');
+      let encontrados = false;
+      
+      tableRows.forEach(row => {
+        const nome = row.cells[1].textContent.toLowerCase();
+        if (nome.includes(searchTerm)) {
+          row.style.display = '';
+          encontrados = true;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      document.getElementById('noDataMessage').style.display = encontrados ? 'none' : 'block';
+      document.getElementById('usersTable').style.display = encontrados ? 'table' : 'none';
+    }
+    
+    function verDetalhes(id) {
+      window.location.href = `usuario-detalhes.html?id=${id}`;
+    }
+    
+    function editarUsuario(id) {
+      window.location.href = `usuario-edicao.html?id=${id}`;
+    }
+    
+    function confirmarExclusao(id) {
+      if (confirm('Tem certeza que deseja excluir este usuário?')) {
+        
+        const successMessage = document.getElementById('successMessage');
+        successMessage.textContent = `Usuário ${id} excluído com sucesso!`;
+        successMessage.style.display = 'block';
+        
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
+      }
+    }
+  </script>
+</body>
+</html>

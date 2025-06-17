@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listagem de Usuários - Sistema de Alertas Bancários</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      color: #1a1a1a;
+    }
+    .menu {
+      background-color: #1a1a1a;
+      color: #f2f2f2;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    .menu h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+    .menu nav {
+      margin-top: 1.5rem;
+    }
+    .menu a {
+      color: #f2f2f2;
+      margin: 0 15px;
+      text-decoration: none;
+      font-size: 1.1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+    .menu a:hover {
+      background-color: #333333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 0.5rem;
+    }
+    .search-container {
+      display: flex;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+    .search-container input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .search-container button {
+      padding: 10px 20px;
+      background-color: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .search-container button:hover {
+      background-color: #333333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+    .no-data {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+  </style>
+  </head>
+  <body>
+    <header class="menu">
+      <h1>Sistema de Alertas Bancários - Admin</h1>
+      <nav>
+        <a href="index.html">Início</a>
+        <a href="listagem_usuarios.html">Usuários</a>
+        <a href="mensagens.html">Mensagens</a>
+        <a href="login.html">Sair</a>
+      </nav>
+    </header>
+
+    <div class="container">
+      <h2>Listagem de Usuários</h2>
+      
+      <div id="successMessage" class="message success">
+        Operação realizada com sucesso!
+      </div>
+      
+      <div id="errorMessage" class="message error">
+        Ocorreu um erro ao processar sua solicitação.
+      </div>
+
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Buscar por nome...">
+        <button onclick="buscarUsuarios()">Buscar</button>
+      </div>
+
+      <button class="add-button" onclick="window.location.href='cadastro.html'">Cadastrar Novo Usuário</button>
+
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+          <!-- Os dados serão preenchidos via JavaScript -->
+        </tbody>
+      </table>
+
+      <div id="noDataMessage" class="no-data">
+        Nenhum usuário encontrado.
+      </div>
+    </div>
+
+    <script>
+      // Carrega os usuários quando a página é aberta
+      document.addEventListener('DOMContentLoaded', carregarUsuarios);
+
+      async function carregarUsuarios() {
+        try {
+          const response = await fetch('http://localhost:8080/users');
+          
+          if (!response.ok) {
+            throw new Error('Erro ao carregar usuários');
+          }
+          
+          const usuarios = await response.json();
+          preencherTabela(usuarios);
+          
+        } catch (error) {
+          mostrarErro(error.message);
+        }
+      }
+
+      function preencherTabela(usuarios) {
+        const tableBody = document.getElementById('usersTableBody');
+        tableBody.innerHTML = '';
+        
+        if (usuarios.length === 0) {
+          document.getElementById('noDataMessage').style.display = 'block';
+          document.getElementById('usersTable').style.display = 'none';
+          return;
+        }
+        
+        usuarios.forEach(usuario => {
+          const row = document.createElement('tr');
+          
+          row.innerHTML = `
+            <td>${usuario.id}</td>
+            <td>${usuario.nome}</td>
+            <td>${formatarTelefone(usuario.telefone)}</td>
+            <td class="action-buttons">
+              <button class="view-btn" onclick="verDetalhes(${usuario.id})">Ver</button>
+              <button class="edit-btn" onclick="editarUsuario(${usuario.id})">Editar</button>
+              <button class="delete-btn" onclick="confirmarExclusao(${usuario.id})">Excluir</button>
+            </td>
+          `;
+          
+          tableBody.appendChild(row);
+        });
+        
+        document.getElementById('noDataMessage').style.display = 'none';
+        document.getElementById('usersTable').style.display = 'table';
+      }
+
+      function formatarTelefone(telefone) {
+        if (!telefone) return '';
+        // Remove tudo que não é dígito
+        const nums = telefone.replace(/\D/g, '');
+        // Formata (XX) XXXXX-XXXX
+        return nums.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      }
+
+      function buscarUsuarios() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const tableRows = document.querySelectorAll('#usersTable tbody tr');
+        let encontrados = false;
+        
+        tableRows.forEach(row => {
+          const nome = row.cells[1].textContent.toLowerCase();
+          if (nome.includes(searchTerm)) {
+            row.style.display = '';
+            encontrados = true;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        document.getElementById('noDataMessage').style.display = encontrados ? 'none' : 'block';
+      }
+      
+      function verDetalhes(id) {
+        window.location.href = `usuario-detalhes.html?id=${id}`;
+      }
+      
+      function editarUsuario(id) {
+        window.location.href = `usuario-edicao.html?id=${id}`;
+      }
+      
+      async function confirmarExclusao(id) {
+        if (confirm('Tem certeza que deseja excluir este usuário?')) {
+          try {
+            const response = await fetch(`http://localhost:8080/users/${id}`, {
+              method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+              throw new Error('Erro ao excluir usuário');
+            }
+            
+            mostrarSucesso(`Usuário ${id} excluído com sucesso!`);
+            // Recarrega a lista após exclusão
+            setTimeout(carregarUsuarios, 1000);
+            
+          } catch (error) {
+            mostrarErro(error.message);
+          }
+        }
+      }
+
+      function mostrarSucesso(mensagem) {
+        const successMessage = document.getElementById('successMessage');
+        successMessage.textContent = mensagem;
+        successMessage.style.display = 'block';
+        
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
+      }
+
+      function mostrarErro(mensagem) {
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = mensagem;
+        errorMessage.style.display = 'block';
+        
+        setTimeout(() => {
+          errorMessage.style.display = 'none';
+        }, 3000);
+      }
+    </script>
+  </body>
+  </html>
